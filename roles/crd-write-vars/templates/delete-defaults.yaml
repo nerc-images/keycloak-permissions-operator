@@ -1,0 +1,3 @@
+---
+CRD_NAME: {{ CRD_NAME }}
+SUBSCRIPTION_NAME: "urn:subscription:{{ CRD_NAME }}-\{\{ values.device.id \}\}"

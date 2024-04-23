@@ -1,0 +1,14 @@
+---
+- name: "Check for CRD_NAME var"
+  fail:
+    msg: |
+      The CRD_NAME var is not defined. 
+      Try running again like this: ansible-playbook crd-write-templates.yaml -e CRD_NAME=...
+  when: CRD_NAME is not defined
+- name: "Load {{ CRD_NAME }} CRD specific schema"
+  ansible.builtin.include_vars:
+    file: "{{ CRD_NAME }}.yaml"
+- name: "Load {{ CRD_NAME }} CRD specific values"
+  ansible.builtin.include_vars:
+    file: "values/values-{{ CRD_NAME }}.yaml"
+  ignore_errors: true

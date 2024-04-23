@@ -1,0 +1,15 @@
+values:
+
+
+  validateCerts: "{{ crd.validateCerts | default(schema | community.general.json_query('validateCerts.default')) }}"
+  cleanupUndefinedAuthorizations: "{{ crd.cleanupUndefinedAuthorizations | default(schema | community.general.json_query('cleanupUndefinedAuthorizations.default')) }}"
+  keycloak:
+    baseUrl: "{{ crd.keycloak.baseUrl | default('') }}"
+    adminSecret:
+      name: "{{ crd.keycloak.adminSecret.name | default(schema | community.general.json_query('keycloak.properties.adminSecret.properties.name.default')) }}"
+      usernameKey: "{{ crd.keycloak.adminSecret.usernameKey | default(schema | community.general.json_query('keycloak.properties.adminSecret.properties.usernameKey.default')) }}"
+      passwordKey: "{{ crd.keycloak.adminSecret.passwordKey | default(schema | community.general.json_query('keycloak.properties.adminSecret.properties.passwordKey.default')) }}"
+  realm:
+    id: "{{ crd.realm.id | default('') }}"
+    clients: "{{ crd.realm.clients | default([]) }}"
+  managementState: "{{ crd.managementState | default(schema | community.general.json_query('managementState.default')) }}"

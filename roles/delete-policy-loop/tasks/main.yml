@@ -1,0 +1,35 @@
+---
+
+- name: Query policies
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/policy?first={{ loop_data_first }}&max={{ loop_data_max }}"
+    validate_certs: "{{ values.validateCerts }}"
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  register: QUERY_POLICIES
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+- name: Remove policy {{ policy_name }} }}
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/policy/{{ policy.id | urlencode }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: DELETE
+    status_code:
+      - 204
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  loop: "{{ QUERY_POLICIES.json }}"
+  loop_control:
+    loop_var: policy
+  when: DELETE_CRD is defined and DELETE_CRD and policy.name in POLICY_NAMES or values.cleanupUndefinedAuthorizations and policy.name not in POLICY_NAMES
+  register: DELETE_POLICY
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+- name: Update loop_data
+  set_fact:
+    loop_data_first: "{{ (loop_data_first | int) + (loop_data_max | int) }}"
+- name: Loop delete-policy-loop
+  include_role: 
+    name: delete-policy-loop
+  when: (QUERY_POLICIES.json | length) == (loop_data_max | int)
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"

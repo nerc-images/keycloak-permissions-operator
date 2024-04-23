@@ -1,0 +1,35 @@
+---
+# tasks file for {{ CRD_NAME }}
+
+- name: "Query {{ CRD_NAME }}"
+  set_fact:
+    crd: "\{\{ (lookup('file', crd_path) | from_yaml).spec \}\}"
+  ignore_errors: true
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+  when: crd_path is defined
+- name: "Query {{ CRD_NAME }}"
+  set_fact:
+    crd: "\{\{ query('kubernetes.core.k8s', kind='{{ CRD_NAME }}', resource_name=ansible_operator_meta.name, namespace=ansible_operator_meta.namespace)[0].spec \}\}"
+  ignore_errors: true
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+  when: crd_path is not defined
+- name: Run Ansible role crd-vars
+  include_role:
+    name: crd-vars
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+- name: "Verify {{ CRD_NAME }} exists"
+  fail:
+    msg: |-
+      You need to deploy a {{ CRD_NAME }} to OpenShift before running this playbook.
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+  when: crd is not defined
+- name: Run Ansible role apply-{{ CRD_NAME | lower }}
+  include_role:
+    name: apply-{{ CRD_NAME | lower }}
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+  when: values.managementState == 'Managed'

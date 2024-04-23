@@ -1,0 +1,26 @@
+apiVersion: keycloak.nerc.mghpcc.org/v1
+kind: KeycloakAuthorization
+metadata:
+  labels:
+    app.kubernetes.io/name: keycloakauthorization
+    app.kubernetes.io/instance: keycloakauthorization-sample
+    app.kubernetes.io/part-of: keycloak-permissions-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: keycloak-permissions-operator
+  name: example
+spec:
+  description: |
+    
+  validateCerts: True
+  cleanupUndefinedAuthorizations: False
+  keycloak:
+    adminSecret:
+      name: |-
+        keycloak-initial-admin
+      usernameKey: |-
+        username
+      passwordKey: |-
+        password
+  realm:
+  managementState: |-
+    Managed

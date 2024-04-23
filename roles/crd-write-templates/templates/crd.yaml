@@ -1,0 +1,135 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: {{ CRD_PLURAL }}.{{ WATCH_DATA.group }}
+spec:
+  group: {{ WATCH_DATA.group }}
+  names:
+    kind: {{ CRD_NAME }}
+    listKind: {{ CRD_NAME }}List
+    plural: {{ CRD_PLURAL }}
+    singular: {{ CRD_NAME | lower }}
+  scope: Namespaced
+  versions:
+  - name: v1
+    schema:
+      openAPIV3Schema:
+        description: |
+          {{ CRD_NAME }} is the Schema for the {{ CRD_PLURAL }} API
+          {{ MODEL_DESCRIPTION | indent(6, False) }}
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Spec defines the desired state of {{ CRD_NAME }}
+            type: object
+            properties:
+{% if smart_data_model is defined %}
+              attributes:
+                type: object
+                properties:
+{% for key, attribute in smart_data_model.attributes.items() %}
+{% if attribute.type != 'array' or attribute.items.type is defined %}
+                  {{ key }}:
+{% if 'geo:point' == attribute.type %}
+                    type: string
+{% else %}
+{% if 'geo:' in attribute.type %}
+                    type: object
+{% else %}
+                    type: {{ attribute.type }}
+{% endif %}
+{% endif %}
+{% if attribute.default is defined %}
+{% if (attribute.default | type_debug) == 'AnsibleUnicode' %}
+                    default: |-
+                      {{ attribute.default | indent(22, False) }}
+{% else %}
+{% if (attribute.default | type_debug) == 'dict' %}
+                    default:
+                      {{ attribute.default | to_nice_yaml(indent=2) | indent(22, False) }}
+{% else %}
+                    default: {{ attribute.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if MODEL_SPEC != '' and MODEL_SPEC[ CRD_NAME ].properties[key] is defined and schema.alternate_model.name is defined %}
+                    description: |2
+                      {{ MODEL_SPEC[ CRD_NAME ].properties[key].description | indent(22, False) }}
+                      See the docs here: https://github.com/smart-data-models/dataModel.{{ SUBMODULE_SHORT_NAME }}/blob/HEAD/{{ MODEL_NAME }}/model.yaml
+{% if attribute.alternate_name is defined %}
+
+                      In {{ schema.alternate_model.name }}, this attribute is known as {{ attribute.alternate_name }}: 
+{% if attribute.alternate_description is defined %}
+                      {{ attribute.alternate_description | indent(22, False) }}
+{% endif %}
+{% if attribute.alternate_docs is defined %}
+                      See the {{ schema.alternate_model.name }} docs here: {{ attribute.alternate_docs | indent(22, False) }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if attribute.items is defined and attribute.items.type is defined %}
+                    items:
+                      type: {{ attribute.items.type }}
+{% endif %}
+{% if attribute.properties is defined %}
+                    properties:
+                      {{ attribute.properties | to_nice_yaml(indent=2) | indent(22, False) }}
+{% else %}
+{% if MODEL_SPEC != '' and MODEL_SPEC[ CRD_NAME ].properties[key].properties is defined %}
+                    properties:
+                      {{ MODEL_SPEC[ CRD_NAME ].properties[key].properties | to_nice_yaml(indent=2) | indent(22, False) }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if schema is defined %}
+{% for key, var in schema.items() %}
+              {{ key }}:
+                type: {{ var.type }}
+{% if var.default is defined %}
+{% if (var.default | type_debug) == 'AnsibleUnicode' %}
+                default: |-
+                  {{ var.default | indent(18, False) }}
+{% else %}
+{% if (var.default | type_debug) == 'dict' %}
+                default:
+                  {{ var.default | to_nice_yaml(indent=2) | indent(18, False) }}
+{% else %}
+                default: {{ var.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if var.properties is defined %}
+                properties:
+                  {{ var.properties | to_nice_yaml(indent=2) | indent(18, False) }}
+{% endif %}
+{% if var.minimum is defined %}
+                minimum: {{ var.minimum }}
+{% endif %}
+{% if var.minimum is defined %}
+                maximum: {{ var.maximum }}
+{% endif %}
+{% endfor %}
+{% endif %}
+          status:
+            description: Status defines the observed state of {{ CRD_NAME }}
+            type: object
+            x-kubernetes-preserve-unknown-fields: true
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

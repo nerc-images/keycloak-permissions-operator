@@ -1,0 +1,102 @@
+apiVersion: {{ WATCH_DATA.group }}/v1
+kind: {{ CRD_NAME }}
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ CRD_NAME | lower }}
+    app.kubernetes.io/instance: {{ CRD_NAME | lower }}-sample
+    app.kubernetes.io/part-of: {{ OPERATOR_NAME }}
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: {{ OPERATOR_NAME }}
+  name: {{ name | default('example') }}
+spec:
+  description: |
+    {{ MODEL_DESCRIPTION }}
+{% if smart_data_model is defined and smart_data_model.attributes is defined %}
+  attributes:
+{% for key, attribute in smart_data_model.attributes.items() %}
+{% if attribute.default is defined %}
+{% if (attribute.default | type_debug) == 'AnsibleUnicode' %}
+    {{ key }}: |
+      {{ attribute.default | indent(6, False) }}
+{% else %}
+{% if (attribute.default | type_debug) == 'dict' %}
+    {{ key }}:
+      {{ attribute.default | to_nice_yaml(indent=2) | indent(6, False) }}
+{% else %}
+    {{ key }}: {{ attribute.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if schema is defined %}
+{% for key1, var1 in schema.items() %}
+{% if var1.default is defined %}
+{% if (var1.default | type_debug) == 'AnsibleUnicode' %}
+  {{ key1 }}: |-
+    {{ var1.default | indent(4, False) }}
+{% else %}
+{% if (var1.default | type_debug) in ['dict', 'list'] %}
+  {{ key1 }}:
+    {{ var1.default | to_nice_yaml(indent=2) | indent(4, False) }}
+{% else %}
+  {{ key1 }}: {{ var1.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if var1.properties is defined %}
+  {{ key1 }}:
+{% for key2, var2 in var1.properties.items() %}
+{% if var2.default is defined %}
+{% if (var2.default | type_debug) == 'AnsibleUnicode' %}
+    {{ key2 }}: |-
+      {{ var2.default | indent(6, False) }}
+{% else %}
+{% if (var2.default | type_debug) in ['dict', 'list'] %}
+    {{ key2 }}:
+      {{ var2.default | to_nice_yaml(indent=2) | indent(6, False) }}
+{% else %}
+    {{ key2 }}: {{ var2.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if var2.properties is defined %}
+    {{ key2 }}:
+{% for key3, var3 in var2.properties.items() %}
+{% if var3.default is defined %}
+{% if (var3.default | type_debug) == 'AnsibleUnicode' %}
+      {{ key3 }}: |-
+        {{ var3.default | indent(8, False) }}
+{% else %}
+{% if (var3.default | type_debug) in ['dict', 'list'] %}
+      {{ key3 }}:
+        {{ var3.default | to_nice_yaml(indent=2) | indent(8, False) }}
+{% else %}
+      {{ key3 }}: {{ var3.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% if var3.properties is defined %}
+      {{ key3 }}:
+{% for key4, var4 in var3.properties.items() %}
+{% if var4.default is defined %}
+{% if (var4.default | type_debug) == 'AnsibleUnicode' %}
+        {{ key4 }}: |-
+          {{ var4.default | indent(10, False) }}
+{% else %}
+{% if (var4.default | type_debug) in ['dict', 'list'] %}
+        {{ key4 }}:
+          {{ var4.default | to_nice_yaml(indent=2) | indent(10, False) }}
+{% else %}
+        {{ key4 }}: {{ var4.default }}
+{% endif %}
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}

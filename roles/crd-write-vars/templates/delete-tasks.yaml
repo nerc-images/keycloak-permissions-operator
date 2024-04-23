@@ -1,0 +1,19 @@
+---
+# tasks to delete {{ CRD_NAME }}
+
+- name: "Query resource"
+  set_fact:
+    crd: "\{\{ query('kubernetes.core.k8s', kind=CRD_NAME, resource_name=ansible_operator_meta.name, namespace=ansible_operator_meta.namespace)[0].spec \}\}"
+  ignore_errors: true
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+- name: Run Ansible role crd-vars
+  include_role:
+    name: crd-vars
+  vars:
+    CRD_NAME: {{ CRD_NAME }}
+- name: Run Ansible role delete-smartdatamodel
+  include_role:
+    name: delete-smartdatamodel
+  vars:
+    CRD_NAME: {{ CRD_NAME }}

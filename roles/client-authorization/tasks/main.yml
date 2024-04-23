@@ -1,0 +1,105 @@
+---
+
+###############################
+# Obtain Keycloak admin token #
+###############################
+
+- name: Get Keycloak auth token
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/realms/master/protocol/openid-connect/token"
+    method: POST
+    body_format: form-urlencoded
+    body:
+      username: "{{ AUTH_USERNAME }}"
+      password: "{{ AUTH_PASSWORD }}"
+      grant_type: password
+      client_id: admin-cli
+    validate_certs: "{{ values.validateCerts }}"
+    status_code:
+      - 200
+  register: AUTH_TOKEN
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+
+###################
+# Apply resources #
+###################
+
+- name: List configured resources by name
+  set_fact:
+    RESOURCE_NAMES: "{{ client.authorizationSettings.resources | default([]) | map(attribute='name') | flatten }}"
+- name: Include resource-authorization role
+  include_role:
+    name: resource-authorization
+  loop: "{{ client.authorizationSettings.resources | default([]) }}"
+  loop_control:
+    loop_var: resource
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+
+#############################
+# Delete obsolete resources #
+#############################
+
+- name: Set loop_data var
+  set_fact:
+    loop_data_first: 0
+    loop_data_max: 100
+- name: Call delete-resource-loop role recursively
+  include_role: 
+    name: delete-resource-loop
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+
+##################
+# Apply policies #
+##################
+
+- name: List configured policies by name
+  set_fact:
+    POLICY_NAMES: "{{ client.authorizationSettings.policies | default([]) | map(attribute='name') | flatten }}"
+- name: Include policy-authorization role
+  include_role:
+    name: policy-authorization
+  loop: "{{ client.authorizationSettings.policies | default([]) }}"
+  loop_control:
+    loop_var: policy
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+
+############################
+# Delete obsolete policies #
+############################
+
+- name: Set loop_data var
+  set_fact:
+    loop_data_first: 0
+    loop_data_max: 100
+- name: Call delete-policy-loop role recursively
+  include_role: 
+    name: delete-policy-loop
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+
+#####################
+# Apply permissions #
+#####################
+
+- name: List configured permissions by name
+  set_fact:
+    PERMISSION_NAMES: "{{ client.authorizationSettings.permissions | default([]) | map(attribute='name') | flatten }}"
+- name: Include permission-authorization role
+  include_role:
+    name: permission-authorization
+  loop: "{{ client.authorizationSettings.permissions | default([]) }}"
+  loop_control:
+    loop_var: permission
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+
+###############################
+# Delete obsolete permissions #
+###############################
+
+- name: Set loop_data var
+  set_fact:
+    loop_data_first: 0
+    loop_data_max: 100
+- name: Call delete-permission-loop role recursively
+  include_role: 
+    name: delete-permission-loop
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"

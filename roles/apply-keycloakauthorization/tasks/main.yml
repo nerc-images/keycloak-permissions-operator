@@ -1,0 +1,18 @@
+---
+- name: Set auth facts
+  set_fact:
+    AUTH_BASE_URL: "{{ values.keycloak.baseUrl }}"
+    AUTH_USERNAME: "{{ query('kubernetes.core.k8s', kind='Secret', resource_name=values.keycloak.adminSecret.name, namespace=ansible_operator_meta.namespace)[0].data[values.keycloak.adminSecret.usernameKey] | b64decode | default('') }}"
+    AUTH_PASSWORD: "{{ query('kubernetes.core.k8s', kind='Secret', resource_name=values.keycloak.adminSecret.name, namespace=ansible_operator_meta.namespace)[0].data[values.keycloak.adminSecret.passwordKey] | b64decode | default('') }}"
+  ignore_errors: true
+  register: SET_AUTH_FACTS
+- name: Auth facts error
+  fail:
+    msg: |-
+      You haven't configured your spec.keycloak.adminSecret in the KeycloakAuthorization {{ ansible_operator_meta.name }} in namespace {{ ansible_operator_meta.namespace }} correctly. Check the name: "{{ values.keycloak.adminSecret.name }}", usernameKey: "{{ values.keycloak.adminSecret.usernameKey }}", and passwordKey: "{{ values.keycloak.adminSecret.passwordKey }}"
+  when: SET_AUTH_FACTS.failed
+- name: Include realm-authorization role
+  include_role:
+    name: realm-authorization
+  vars:
+    REALM_ID: "{{ values.realm.id }}"

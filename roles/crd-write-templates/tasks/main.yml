@@ -1,0 +1,30 @@
+---
+- name: Read the watches.yaml
+  slurp:
+    path: "{{ WATCHES_PATH }}"
+  register: WATCHES_SLURP
+- name: Set the watches.yaml data to a fact
+  set_fact:
+    WATCHES_DATA: "{{ WATCHES_SLURP['content'] | b64decode | from_yaml }}"
+- name: Find index of kind in watches.yaml data
+  ansible.builtin.set_fact:
+    WATCHES_INDEX: "{{ lookup('ansible.utils.index_of', WATCHES_DATA, 'eq', CRD_NAME, 'kind') }}"
+- name: Set WATCH_DATA variable
+  ansible.builtin.set_fact:
+    WATCH_DATA: "{{ WATCHES_DATA[ WATCHES_INDEX | int ] }}"
+- name: Set MODEL_CRD_PATH
+  set_fact:
+    MODEL_CRD_PATH: "{{ playbook_dir }}/config/crd/bases/{{ WATCH_DATA.group }}_{{ CRD_PLURAL }}.yaml"
+
+- name: "Write the {{ CRD_NAME }} sample: {{ MODEL_SAMPLE_PATH }}"
+  ansible.builtin.template:
+    src: "sample.yaml"
+    dest: "{{ MODEL_SAMPLE_PATH }}"
+- name: "Write the {{ CRD_NAME }} CRD: {{ MODEL_CRD_PATH }}"
+  ansible.builtin.template:
+    src: "crd.yaml"
+    dest: "{{ MODEL_CRD_PATH }}"
+- name: "Write the {{ CRD_NAME }} values: {{ MODEL_VALUES_PATH }}"
+  ansible.builtin.copy:
+    content: "{{ lookup('template', 'values.yaml') | replace('\\{\\{', '{{') | replace('\\}\\}', '}}') }}"
+    dest: "{{ MODEL_VALUES_PATH }}"

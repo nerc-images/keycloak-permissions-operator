@@ -1,0 +1,12 @@
+---
+# Be sure to set the CRD_NAME var before running this playbook. 
+# ansible-playbook write-smart-data-model-templates.yaml -e CRD_NAME=...
+
+- name: Write CRD files to the Operator
+  connection: local
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - crd-write-vars
+    - crd-vars
+    - crd-write-templates

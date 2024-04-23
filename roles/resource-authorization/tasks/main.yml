@@ -1,0 +1,33 @@
+---
+- name: Get Keycloak authorization resource "{{ resource.name }}" for realm {{ REALM_ID }}, client {{ CLIENT_ID }}
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/resource/search?name={{ resource.name | urlencode }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  ignore_errors: true
+  register: GET_RESOURCE
+  when: DELETE_CRD is not defined or not DELETE_CRD
+- name: "{{ 'Create' if GET_RESOURCE.failed else 'Update' }} Keycloak authorization resource \"{{ resource.name }}\" for realm {{ REALM_ID }}, client {{ CLIENT_ID }}"
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/resource{{ '' if GET_RESOURCE.failed else ('/' + (GET_RESOURCE.json._id | default('') | urlencode)) }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: "{{ 'POST' if GET_RESOURCE.failed else 'PUT' }}"
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+    status_code:
+      - 201
+      - 204
+    body_format: json
+    body:
+      name: "{{ resource.name }}"
+      uris: "{{ resource.uris | default(omit) }}"
+      type: "{{ resource.type | default(omit) }}"
+      scopes: "{{ resource.scopes | default(omit) }}"
+      icon_uri: "{{ resource.iconUri | default(omit) }}"
+      displayName: "{{ resource.displayName | default(omit) }}"
+      attributes: "{{ resource.attributes | default(omit) }}"
+      uri: "{{ resource.uri | default(omit) }}"
+      scopesUma: "{{ resource.scopesUma | default(omit) }}"
+  when: DELETE_CRD is not defined or not DELETE_CRD

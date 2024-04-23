@@ -1,0 +1,22 @@
+---
+name: example
+description: |
+  
+schema:
+  managementState:
+    type: string
+    default: Managed
+    enum:
+      - Managed
+      - Unmanaged
+smart_data_model:
+  attributes:
+    object_id:
+      type: string
+    location:
+      name: location
+      type: "geo:point"
+      required: true
+      description: |
+        Geojson reference to the item. It can be Point, LineString, Polygon, MultiPoint, MultiLineString or MultiPolygon
+

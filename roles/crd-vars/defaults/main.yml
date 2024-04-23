@@ -1,0 +1,3 @@
+---
+CRD_VARS_PATH: "{{ playbook_dir }}/roles/crd-vars/vars/{{ CRD_NAME }}.yaml"
+CRD_VARS_VALUES_PATH: "{{ playbook_dir }}/roles/crd-vars/vars/values/values-{{ CRD_NAME }}.yaml"

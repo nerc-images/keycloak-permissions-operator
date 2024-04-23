@@ -1,0 +1,10 @@
+---
+- name: Include client-authorization role
+  include_role:
+    name: client-authorization
+  vars:
+    CLIENT_ID: "{{ client.id }}"
+  loop: "{{ values.realm.clients }}"
+  loop_control:
+    loop_var: client
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"

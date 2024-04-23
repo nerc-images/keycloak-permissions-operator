@@ -1,0 +1,53 @@
+---
+- name: Get Keycloak authorization policy "{{ policy.name }}" for realm {{ REALM_ID }}, client {{ CLIENT_ID }}
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/policy/search?name={{ policy.name | urlencode }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: GET
+    status_code:
+      - 200
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  ignore_errors: true
+  register: GET_POLICY
+  when: DELETE_CRD is not defined or not DELETE_CRD
+- name: "{{ 'Create' if GET_POLICY.failed else 'Update' }} Keycloak authorization policy \"{{ policy.name }}\" for realm {{ REALM_ID }}, client {{ CLIENT_ID }}"
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/policy/{{ policy.type.keys() | first }}{{ '' if GET_POLICY.failed else ('/' + (GET_POLICY.json.name | default('') | urlencode)) }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: "{{ 'POST' if GET_POLICY.failed else 'PUT' }}"
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+    status_code:
+      - 201
+      - 204
+    body_format: json
+    body:
+      id: "{{ policy.id | default(omit) }}"
+      name: "{{ policy.name }}"
+      logic: "{{ policy.logic }}"
+      description: "{{ policy.description | default(omit) }}"
+      decisionStrategy: "{{ policy.decisionStrategy | default(omit) }}"
+      config: "{{ policy.config | default(omit) }}"
+      clients: "{{ policy.type.client.clients | default(omit) }}"
+      policies: "{{ policy.type.aggregated.policies | default(omit) }}"
+      clientScopes: "{{ policy.type['client-scope'].clientScopes | default(omit) }}"
+      groupsClaim: "{{ policy.type.group.groupsClaim | default(omit) }}"
+      groups: "{{ policy.type.group.groups | default(omit) }}"
+      pattern: "{{ policy.type.regex.pattern | default(omit) }}"
+      targetClaim: "{{ policy.type.regex.targetClaim | default(omit) }}"
+      targetContextAttributes: "{{ policy.type.regex.targetContextAttributes | default(omit) }}"
+      roles: "{{ policy.type.role.roles | default(omit) }}"
+      notBefore: "{{ policy.type.time.notBefore | default(omit) }}"
+      notOnOrAfter: "{{ policy.type.time.notOnOrAfter | default(omit) }}"
+      notAfter: "{{ policy.type.time.notAfter | default(omit) }}"
+      month: "{{ policy.type.time.month | default(omit) }}"
+      monthEnd: "{{ policy.type.time.monthEnd | default(omit) }}"
+      dayMonth: "{{ policy.type.time.dayMonth | default(omit) }}"
+      dayMonthEnd: "{{ policy.type.time.dayMonthEnd | default(omit) }}"
+      hour: "{{ policy.type.time.hour | default(omit) }}"
+      hourEnd: "{{ policy.type.time.hourEnd | default(omit) }}"
+      minute: "{{ policy.type.time.minute | default(omit) }}"
+      minuteEnd: "{{ policy.type.time.minuteEnd | default(omit) }}"
+      users: "{{ policy.type.user.users | default(omit) }}"
+  when: DELETE_CRD is not defined or not DELETE_CRD

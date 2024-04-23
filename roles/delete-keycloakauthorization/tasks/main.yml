@@ -1,0 +1,28 @@
+---
+
+- name: "Query resource"
+  set_fact:
+    crd: "{{ query('kubernetes.core.k8s', kind=CRD_NAME, resource_name=ansible_operator_meta.name, namespace=ansible_operator_meta.namespace)[0].spec }}"
+  ignore_errors: true
+  vars:
+    CRD_NAME: KeycloakAuthorization
+- name: Run Ansible role crd-vars
+  include_role:
+    name: crd-vars
+  vars:
+    CRD_NAME: KeycloakAuthorization
+- name: Set auth facts
+  set_fact:
+    AUTH_BASE_URL: "{{ values.keycloak.baseUrl }}"
+    AUTH_USERNAME: "{{ query('kubernetes.core.k8s', kind='Secret', resource_name=values.keycloak.adminSecret.name, namespace=ansible_operator_meta.namespace)[0].data[values.keycloak.adminSecret.usernameKey] | b64decode | default('') }}"
+    AUTH_PASSWORD: "{{ query('kubernetes.core.k8s', kind='Secret', resource_name=values.keycloak.adminSecret.name, namespace=ansible_operator_meta.namespace)[0].data[values.keycloak.adminSecret.passwordKey] | b64decode | default('') }}"
+  ignore_errors: true
+  register: SET_AUTH_FACTS
+- name: Include realm-authorization role
+  include_role:
+    name: realm-authorization
+  vars:
+    REALM_ID: "{{ values.realm.id }}"
+    DELETE_CRD: true
+  ignore_errors: true
+  when: not SET_AUTH_FACTS.failed

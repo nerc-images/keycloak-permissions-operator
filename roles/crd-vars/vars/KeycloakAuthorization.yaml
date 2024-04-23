@@ -1,0 +1,238 @@
+---
+name: example
+description: |
+  
+schema:
+  validateCerts:
+    type: boolean
+    default: true
+  cleanupUndefinedAuthorizations:
+    type: boolean
+    default: false
+  keycloak:
+    type: object
+    properties:
+      baseUrl:
+        type: string
+        description: |-
+          Example: https://keycloak.apps-crc.testing
+      adminSecret:
+        type: object
+        properties:
+          name:
+            type: string
+            default: keycloak-initial-admin
+          usernameKey:
+            type: string
+            default: username
+          passwordKey:
+            type: string
+            default: password
+  realm:
+    type: object
+    properties:
+      id:
+        type: string
+      clients:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            authorizationSettings:
+              type: object
+              properties:
+                resources:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      displayName:
+                        type: string
+                      uris:
+                        type: array
+                        items:
+                          type: string
+                      type:
+                        type: string
+                      iconUri:
+                        type: string
+                      scopes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            displayName:
+                              type: string
+                      attributes:
+                        type: array
+                        items:
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                      uri:
+                        type: string
+                      scopesUma:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            displayName:
+                              type: string
+                policies:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      description:
+                        type: string
+                      type:
+                        type: object
+                        description: Only use one of the following policy types (aggregated, client, client-scope, group, regex, role, time, user)
+                        properties:
+                          aggregated:
+                            type: object
+                            properties:
+                              policies:
+                                type: array
+                                description: array of policy ids
+                                items:
+                                  type: string
+                          client:
+                            type: object
+                            properties:
+                              clients:
+                                type: array
+                                items:
+                                  type: string
+                          client-scope:
+                            type: object
+                            properties:
+                              clientScopes:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    required:
+                                      type: boolean
+                          group:
+                            type: object
+                            properties:
+                              groupsClaim:
+                                type: string
+                              groups:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    extendChildren:
+                                      type: boolean
+                          regex:
+                            type: object
+                            properties:
+                              pattern:
+                                type: string
+                              targetClaim:
+                                type: string
+                              targetContextAttributes:
+                                type: boolean
+                          role:
+                            type: object
+                            properties:
+                              roles:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    required:
+                                      type: boolean
+                          time:
+                            type: object
+                            properties:
+                              notBefore:
+                                type: string
+                                description: 2024-04-25 00:00:00
+                              notOnOrAfter:
+                                type: string
+                                description: 2024-04-26 00:00:00
+                              notAfter:
+                                type: string
+                                description: 2024-04-26 00:00:00
+                              month:
+                                type: number
+                              monthEnd:
+                                type: number
+                              dayMonth:
+                                type: number
+                              dayMonthEnd:
+                                type: number
+                              hour:
+                                type: number
+                              hourEnd:
+                                type: number
+                              minute:
+                                type: number
+                              minuteEnd:
+                                type: number
+                          user:
+                            type: object
+                            properties:
+                              users:
+                                type: array
+                                items:
+                                  type: string
+                      logic:
+                        type: string
+                        enum:
+                          - POSITIVE
+                          - NEGATIVE
+                      decisionStrategy:
+                        type: string
+                        enum:
+                          - UNANIMOUS
+                          - AFFIRMATIVE
+                      config:
+                        type: object
+                        properties:
+                          groups:
+                            type: string
+
+                permissions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      policy:
+                        type: string
+                      resource:
+                        type: string
+                      scope:
+                        type: string
+  managementState:
+    type: string
+    default: Managed
+    enum:
+      - Managed
+      - Unmanaged

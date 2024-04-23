@@ -1,0 +1,23 @@
+---
+- name: Configure {{ 'scope' if permission.scope is defined else 'resource' }}-based Keycloak authorization permission for realm {{ REALM_ID }}, client {{ CLIENT_ID }}, policy {{ permission.policy }}, resource {{ permission.resource }}{{ (', scope ' + permission.scope) if permission.scope is defined else '' }}
+  community.general.keycloak_authz_permission:
+    name: "{{ permission.name }}"
+    state: present
+    description: >-
+      Grant the {{ permission.policy }} policy access to
+      all {{ (permission.scope + ' ' + permission.resource) if permission.scope is defined else ('all ' + permission.resource) }}
+      in the {{ REALM_ID }} {{ CLIENT_ID }} client.
+    permission_type: "{{ 'scope' if permission.scope is defined else 'resource' }}"
+    policies:
+      - "{{ permission.policy }}"
+    resources:
+      - "{{ permission.resource }}"
+    scopes: "{{ [permission.scope] if permission.scope is defined else [] }}"
+    realm: "{{ REALM_ID }}"
+    client_id: "{{ CLIENT_ID }}"
+    auth_keycloak_url: "{{ AUTH_BASE_URL }}"
+    auth_username: "{{ AUTH_USERNAME }}"
+    auth_password: "{{ AUTH_PASSWORD }}"
+    auth_realm: master
+    validate_certs: "{{ values.validateCerts }}"
+  when: DELETE_CRD is not defined or not DELETE_CRD

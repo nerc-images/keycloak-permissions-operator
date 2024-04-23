@@ -1,0 +1,12 @@
+---
+# Use the 'create api' subcommand to add watches to this file.
+- finalizer:
+    name: nerc.mghpcc.org/keycloakauthorization-finalizer
+    role: delete-keycloakauthorization
+  group: keycloak.nerc.mghpcc.org
+  kind: KeycloakAuthorization
+  role: keycloakauthorization
+  snakeCaseParameters: false
+  version: v1
+  watchDependentResources: false
+#+kubebuilder:scaffold:watch

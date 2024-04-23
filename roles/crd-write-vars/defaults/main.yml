@@ -1,0 +1,12 @@
+---
+CRD_PLURAL: "{{ CRD_NAME | lower }}s"
+CRD_VARS_PATH: "{{ playbook_dir }}/roles/crd-vars/vars/{{ CRD_NAME }}.yaml"
+CRD_VARS_VALUES_PATH: "{{ playbook_dir }}/roles/crd-vars/vars/values/values-{{ CRD_NAME }}.yaml"
+WATCHES_PATH: "{{ playbook_dir }}/watches.yaml"
+MAIN_ROLE_TASKS_PATH: "{{ playbook_dir }}/roles/{{ CRD_NAME | lower }}/tasks/main.yml"
+ROLE_DEFAULTS_PATH: "{{ playbook_dir }}/roles/apply-{{ CRD_NAME | lower }}/defaults/main.yml"
+ROLE_TASKS_PATH: "{{ playbook_dir }}/roles/apply-{{ CRD_NAME | lower }}/tasks/main.yml"
+APPLY_PLAYBOOK_PATH: "{{ playbook_dir }}/apply-{{ CRD_NAME | lower }}.yaml"
+DELETE_DEFAULTS_PATH: "{{ playbook_dir }}/roles/delete-{{ CRD_NAME | lower }}/defaults/main.yml"
+DELETE_TASKS_PATH: "{{ playbook_dir }}/roles/delete-{{ CRD_NAME | lower }}/tasks/main.yml"
+DELETE_PLAYBOOK_PATH: "{{ playbook_dir }}/delete-{{ CRD_NAME | lower }}.yaml"

@@ -1,0 +1,35 @@
+---
+
+- name: Query resources
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/resource?first={{ loop_data_first }}&max={{ loop_data_max }}"
+    validate_certs: "{{ values.validateCerts }}"
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  register: QUERY_RESOURCES
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+- name: Remove resource {{ resource_name }} }}
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/resource/{{ resource._id | urlencode }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: DELETE
+    status_code:
+      - 204
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  loop: "{{ QUERY_RESOURCES.json }}"
+  loop_control:
+    loop_var: resource
+  when: DELETE_CRD is defined and DELETE_CRD and resource.name in RESOURCE_NAMES or values.cleanupUndefinedAuthorizations and resource.name not in RESOURCE_NAMES
+  register: DELETE_RESOURCE
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
+- name: Update loop_data
+  set_fact:
+    loop_data_first: "{{ (loop_data_first | int) + (loop_data_max | int) }}"
+- name: Loop delete-resource-loop
+  include_role: 
+    name: delete-resource-loop
+  when: (QUERY_RESOURCES.json | length) == (loop_data_max | int)
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"

@@ -1,0 +1,3 @@
+---
+CRD_NAME: KeycloakAuthorization
+SUBSCRIPTION_NAME: "urn:subscription:KeycloakAuthorization-{{ values.device.id }}"
