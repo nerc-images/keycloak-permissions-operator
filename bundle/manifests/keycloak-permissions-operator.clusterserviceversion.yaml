@@ -33,11 +33,17 @@ metadata:
           }
         }
       ]
-    capabilities: Basic Install
-    createdAt: "2024-04-30T04:35:09Z"
+    capabilities: Fine-grained resource permissions
+    categories: Security
+    containerImage: quay.io/nerc-images/keycloak-permissions-operator
+    createdAt: "2024-04-30T12:10:43Z"
+    description: Managing Keycloak resources, scopes, policies, and permissions for
+      fine-grained resource permissions
     operators.operatorframework.io/builder: operator-sdk-v1.28.1
     operators.operatorframework.io/project_layout: ansible.sdk.operatorframework.io/v1
-  name: keycloak-permissions-operator.v1.0.0
+    repository: https://github.com/nerc-images/keycloak-permissions-operator
+    support: New England Research Cloud
+  name: keycloak-permissions-operator.v1.2.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -69,21 +75,21 @@ spec:
     authorizations that may have been added manually. This is useful for keeping in
     sync with GitOps. If you do not want the operator removing any resources, policies,
     or permissions, then remove this line.\n\n```yaml\nspec:\n  validateCerts: false\n
-    \ cleanupUndefinedAuthorizations: true\n```\n\n### Keycloak admin credentials\n\nSpecify
+    \ cleanupUndefinedAuthorizations: true\n```\n\n## Keycloak admin credentials\n\nSpecify
     the details to connect to keycloak, including the `baseUrl`, and the Secret name
     containing the Keycloak admin usernameKey and passwordKey.\n\n```yaml\n  keycloak:\n
     \   baseUrl: https://keycloak-service:8443\n    adminSecret:\n      name: keycloak-initial-admin\n
-    \     usernameKey: username\n      passwordKey: password\n```\n\n### Realm\n\nSpecify
+    \     usernameKey: username\n      passwordKey: password\n```\n\n## Realm\n\nSpecify
     the realm id you wish to add authorization configuration to. If you want to add
     authorization configuration to multiple realms, then create a KeycloakAuthorization
-    resource for each realm.\n\n```yaml\n  realm:\n    id: NERC\n```\n\n### Clients\n\nFor
+    resource for each realm.\n\n```yaml\n  realm:\n    id: NERC\n```\n\n## Clients\n\nFor
     each client in the realm you wish to configure, add authorizationSettings.\n\n```yaml\n
-    \   clients:\n      - id: ai4cloudops\n        authorizationSettings:\n```\n\n###
+    \   clients:\n      - id: ai4cloudops\n        authorizationSettings:\n```\n\n##
     Authorization Resources\n\nList the resources and corresponding scopes you wish
     to define for the client.\n\n```yaml\n      resources:\n        - name: cluster\n
     \         displayName: cluster\n          scopes:\n            - id: prod\n              name:
     prod\n              displayName: Production\n            - id: test\n              name:
-    test\n              displayName: Test\n```\n\n### Authorization Policies\n\nDefine
+    test\n              displayName: Test\n```\n\n## Authorization Policies\n\nDefine
     the policies you wish to use in your permissions. You can choose from all the
     different types of permissions, including: aggregated, client, client-scope, group,
     regex, role, time, and user.\n\n```yaml\n      policies:\n        - id: client-example\n
@@ -91,7 +97,7 @@ spec:
     UNANIMOUS\n          type:\n            client:\n              clients:\n                -
     example\n        - id: group-example\n          name: group-example\n          logic:
     POSITIVE\n          decisionStrategy: UNANIMOUS\n          type:\n            group:\n
-    \             groups:\n                - id: example\n```\n\n### Authorization
+    \             groups:\n                - id: example\n```\n\n## Authorization
     Permissions\n\nDefine the permissions, connecting the resources, scopes, and policies
     together.\n\n```yaml\n      permissions:\n        - name: group-example-cluster-test\n
     \         client: test\n          policy: group-example\n          resource: cluster\n
@@ -238,7 +244,7 @@ spec:
                 env:
                 - name: ANSIBLE_GATHERING
                   value: explicit
-                image: quay.io/nerc-images/keycloak-permissions-operator:1.0.0
+                image: quay.io/nerc-images/keycloak-permissions-operator:1.2.0
                 livenessProbe:
                   httpGet:
                     path: /healthz
@@ -324,8 +330,12 @@ spec:
   links:
   - name: Keycloak Permissions Operator
     url: https://keycloak-permissions-operator.domain
+  maintainers:
+  - email: computate@computate.org
+    name: Christopher Tate
   maturity: alpha
+  minKubeVersion: 1.24.0
   provider:
     name: New England Research Cloud
     url: https://nerc.mghpcc.org/
-  version: 1.0.0
+  version: 1.2.0
