@@ -5,7 +5,7 @@
     state: present
     description: >-
       Grant the {{ permission.policy }} policy access to
-      all {{ (permission.scope + ' ' + permission.resource) if permission.scope is defined else ('all ' + permission.resource) }}
+      all {{ (permission.scope + ' ' + permission.resource) if permission.scope is defined else (permission.resource) }}
       in the {{ REALM_ID }} {{ CLIENT_ID }} client.
     permission_type: "{{ 'scope' if permission.scope is defined else 'resource' }}"
     policies:

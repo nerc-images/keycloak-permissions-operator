@@ -255,6 +255,19 @@ spec:
                                     type: array
                                 type: object
                               type: array
+                            scopes:
+                              items:
+                                properties:
+                                  displayName:
+                                    type: string
+                                  iconUri:
+                                    type: string
+                                  id:
+                                    type: string
+                                  name:
+                                    type: string
+                                type: object
+                              type: array
                           type: object
                         id:
                           type: string

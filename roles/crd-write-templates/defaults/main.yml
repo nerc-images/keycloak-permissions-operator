@@ -1,4 +1,5 @@
 ---
+OPERATOR_NAME: keycloak-permissions-operator
 WATCHES_PATH: "{{ playbook_dir }}/watches.yaml"
 MODEL_SAMPLE_PATH: "{{ playbook_dir }}/config/samples/{{ WATCH_DATA.group | split('.') | first }}_v1_{{ CRD_NAME | lower }}.yaml"
 MODEL_VALUES_PATH: "{{ playbook_dir }}/roles/crd-vars/vars/values/values-{{ CRD_NAME }}.yaml"

@@ -1,0 +1,27 @@
+---
+
+- name: Query scopes
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/scope?first={{ loop_data_first }}&max={{ loop_data_max }}"
+    validate_certs: "{{ values.validateCerts }}"
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  register: QUERY_SCOPES
+- name: Remove scope {{ scope.name }}
+  community.general.keycloak_authz_authorization_scope:
+    name: "{{ scope.name }}"
+    state: absent
+    realm: "{{ REALM_ID }}"
+    client_id: "{{ CLIENT_ID }}"
+    auth_keycloak_url: "{{ AUTH_BASE_URL }}"
+    auth_username: "{{ AUTH_USERNAME }}"
+    auth_password: "{{ AUTH_PASSWORD }}"
+    auth_realm: master
+    validate_certs: "{{ values.validateCerts }}"
+  loop: "{{ QUERY_SCOPES.json }}"
+  loop_control:
+    loop_var: scope
+  when: DELETE_CRD is defined and DELETE_CRD and scope.name in SCOPE_NAMES or values.cleanupUndefinedAuthorizations and scope.name not in SCOPE_NAMES
+  ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"

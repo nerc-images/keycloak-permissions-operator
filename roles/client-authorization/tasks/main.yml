@@ -20,6 +20,32 @@
   register: AUTH_TOKEN
   ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
 
+################
+# Apply scopes #
+################
+
+- name: Include scope-authorization role
+  include_role:
+    name: scope-authorization
+  loop: "{{ client.authorizationSettings.scopes | default([]) }}"
+  loop_control:
+    loop_var: scope
+- name: List configured scopes by name
+  set_fact:
+    SCOPE_NAMES: "{{ client.authorizationSettings.scopes | default([]) | map(attribute='name') | flatten }}"
+
+##########################
+# Delete obsolete scopes #
+##########################
+
+- name: Set loop_data var
+  set_fact:
+    loop_data_first: 0
+    loop_data_max: 100
+- name: Call delete-scope-loop role recursively
+  include_role: 
+    name: delete-scope-loop
+
 ###################
 # Apply resources #
 ###################

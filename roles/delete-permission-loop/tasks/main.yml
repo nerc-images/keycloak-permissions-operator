@@ -10,7 +10,7 @@
       Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
   register: QUERY_PERMISSIONS
   ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
-- name: Remove permission {{ permission_name }} }}
+- name: Remove permission {{ permission.name }}
   community.general.keycloak_authz_permission:
     name: "{{ permission.name }}"
     state: absent

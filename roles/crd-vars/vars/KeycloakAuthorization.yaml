@@ -43,6 +43,22 @@ schema:
             authorizationSettings:
               type: object
               properties:
+
+                scopes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: max 36 characters
+                      name:
+                        type: string
+                      displayName:
+                        type: string
+                      iconUri:
+                        type: string
+
                 resources:
                   type: array
                   items:
@@ -89,6 +105,7 @@ schema:
                               type: string
                             displayName:
                               type: string
+
                 policies:
                   type: array
                   items:

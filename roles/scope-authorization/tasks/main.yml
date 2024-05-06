@@ -1,0 +1,27 @@
+---
+- name: Get Keycloak authorization scope "{{ scope.id }}" for realm {{ REALM_ID }}, client {{ CLIENT_ID }}
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/scope/{{ scope.id | urlencode }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: GET
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+  ignore_errors: true
+  register: GET_SCOPE
+- name: "{{ 'Create' if GET_SCOPE.failed else 'Update' }} Keycloak authorization scope \"{{ scope.id }}\" for realm {{ REALM_ID }}, client {{ CLIENT_ID }}"
+  ansible.builtin.uri:
+    url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/scope{{ '' if GET_SCOPE.failed else ('/' + (GET_SCOPE.json._id | default('') | urlencode)) }}"
+    validate_certs: "{{ values.validateCerts }}"
+    method: "{{ 'POST' if GET_SCOPE.failed else 'PUT' }}"
+    headers:
+      Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
+    status_code:
+      - 201
+      - 204
+    body_format: json
+    body:
+      id: "{{ scope.id | default(omit) }}"
+      name: "{{ scope.name }}"
+      displayName: "{{ scope.displayName | default(omit) }}"
+      iconUri: "{{ scope.iconUri | default(omit) }}"
+  when: GET_SCOPE.failed

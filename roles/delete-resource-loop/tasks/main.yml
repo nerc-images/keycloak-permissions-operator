@@ -10,7 +10,7 @@
       Authorization: "Bearer {{ AUTH_TOKEN.json.access_token }}"
   register: QUERY_RESOURCES
   ignore_errors: "{{  DELETE_CRD is defined and DELETE_CRD }}"
-- name: Remove resource {{ resource_name }} }}
+- name: Remove resource {{ resource.name }}
   ansible.builtin.uri:
     url: "{{ AUTH_BASE_URL }}/admin/realms/{{ REALM_ID }}/clients/{{ CLIENT_ID }}/authz/resource-server/resource/{{ resource._id | urlencode }}"
     validate_certs: "{{ values.validateCerts }}"
