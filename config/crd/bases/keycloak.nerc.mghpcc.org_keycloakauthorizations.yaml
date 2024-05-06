@@ -35,7 +35,7 @@ spec:
             description: Spec defines the desired state of KeycloakAuthorization
             type: object
             properties:
-              validateCerts:
+              validateCertsvalidateCerts:
                 type: boolean
                 default: True
               cleanupUndefinedAuthorizations:
