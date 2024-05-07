@@ -35,7 +35,7 @@ spec:
             description: Spec defines the desired state of KeycloakAuthorization
             type: object
             properties:
-              validateCertsvalidateCerts:
+              validateCerts:
                 type: boolean
                 default: True
               cleanupUndefinedAuthorizations:
@@ -263,6 +263,7 @@ spec:
                                   iconUri:
                                     type: string
                                   id:
+                                    description: max 36 characters
                                     type: string
                                   name:
                                     type: string
