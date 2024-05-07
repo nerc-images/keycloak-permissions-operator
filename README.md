@@ -1,5 +1,5 @@
 # keycloak-permissions-operator
-An OpenShift Operator for managing Keycloak resources, scopes, policies, and permissions for fine-grained resource permissions. 
+An OpenShift Operator for managing Keycloak resources, scopes, policies, and permissions for fine-grained resource permissions.
 
 ## Install the Operator SDK
 
@@ -51,27 +51,85 @@ ansible-playbook apply-keycloakauthorization.yaml \
 
 ## Build the latest Operator Bundle
 
-Start by deleting the previous operator bundle
+Start by deleting the previous operator bundle in your OpenShift Local cluster.
 
 ```bash
 oc -n keycloak delete catalogsource/keycloak-permissions-operator-catalog
-oc -n keycloak delete subscription/keycloak-permissions-operator-v1-3-0-sub
-oc -n keycloak delete csv/keycloak-permissions-operator.v1.3.0
+oc -n keycloak delete subscription -l operators.coreos.com/keycloak-permissions-operator.keycloak=''
+oc -n keycloak delete csv -l operators.coreos.com/keycloak-permissions-operator.keycloak=''
 ```
 
-Now build the latest Operator Bundle. 
+Set up some reusable environment variables for the Operator Bundle.
 
 ```bash
 export USERNAME=computate
-export VERSION=1.4.0
+export VERSION=1.4.1
 export IMG=quay.io/nerc-images/keycloak-permissions-operator:$VERSION
 export BUNDLE_IMG=quay.io/nerc-images/keycloak-permissions-operator-bundle:$VERSION
+```
+
+Update the Operator version in the MakeFile and ClusterServiceVersion.
+
+```bash
 perl -pi -e 's/^(VERSION \?= ).*/${1}'"$VERSION"'/g' Makefile
+perl -pi -e 's/(containerImage: quay\.io\/nerc-images\/keycloak-permissions-operator:).*/${1}'"$VERSION"'/g' \
+  config/manifests/bases/keycloak-permissions-operator.clusterserviceversion.yaml
+```
+
+Now build and validate the latest Operator Bundle.
+
+```bash
 make podman-build podman-push
-#make bundle # resets certain labels required
+make bundle
 make bundle-build bundle-push
 operator-sdk bundle validate $BUNDLE_IMG
-operator-sdk -n keycloak run bundle $BUNDLE_IMG --security-context-config restricted
-rsync -r bundle/ ../community-operators-prod/operators/keycloak-permissions-operator/$VERSION/
-rsync -r bundle/ ../community-operators/operators/keycloak-permissions-operator/$VERSION/
 ```
+
+Deploy the latest Operator bundle to your local OpenShift Local cluster.
+
+```bash
+operator-sdk -n keycloak run bundle $BUNDLE_IMG --security-context-config restricted
+```
+
+## Contribute the operator to operatorhub.io
+
+Create a fork of the community-operators repo: https://github.com/k8s-operatorhub/community-operators
+Clone your community-operators fork repository.
+
+```bash
+git clone git@github.com:computate/community-operators.git ~/.local/src/community-operators/
+cd ~/.local/src/community-operators/
+```
+
+Set up the community-operators upstream remote.
+
+```bash
+cd ~/.local/src/community-operators/
+git remote add upstream git@github.com:k8s-operatorhub/community-operators.git
+```
+
+Create a new branch for your version.
+
+```bash
+git checkout -b keycloak-permissions-operator-$VERSION
+```
+
+Copy the latest version of the operator to community-operators.
+
+```bash
+mkdir -p ~/.local/src/community-operators/operators/keycloak-permissions-operator/$VERSION/
+rsync -r bundle/ ~/.local/src/community-operators/operators/keycloak-permissions-operator/$VERSION/
+```
+
+- Git add and git commit your changes. 
+- Be sure to include your signature: `Signed-off-by: My Name <me@example.com>`
+- Make a pull request with the gh CLI.
+
+```bash
+gh pr create -f
+```
+
+## Contributing new versions of the operator
+
+- Learn [how to contribute new versions of the operator to Kubernetes operatorhub.io](doc/contribute-operator-to-kubernetes.md)
+- Learn [how to contribute new versions of the operator to Red Hat OpenShift](doc/contribute-operator-to-openshift.md)
