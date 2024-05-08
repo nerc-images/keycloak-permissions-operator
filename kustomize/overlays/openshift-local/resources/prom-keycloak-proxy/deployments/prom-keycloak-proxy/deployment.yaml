@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prom-keycloak-proxy
+    deployment: prom-keycloak-proxy
+  name: prom-keycloak-proxy
+  namespace: prom-keycloak-proxy
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: prom-keycloak-proxy
+      deployment: prom-keycloak-proxy
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: prom-keycloak-proxy
+        deployment: prom-keycloak-proxy
+      name: prom-keycloak-proxy
+    spec:
+      containers:
+        - env:
+            - name: PROXY_AUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: postgres-pguser-sso
+            - name: PROXY_AUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: postgres-pguser-sso
+            - name: PROXY_AUTH_REALM
+              value: NERC
+            - name: PROXY_AUTH_BASE_URL
+              value: https://keycloak.apps-crc.testing
+            - name: PROXY_AUTH_TLS_VERIFY
+              value: false
+            - name: PROXY_PROMETHEUS_ENDPOINT
+              value: https://observatorium-api-open-cluster-management-observability.apps.nerc-ocp-infra.rc.fas.harvard.edu/api/metrics/v1/default
+            - name: PROXY_PROMETHEUS_CA_CRT
+              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+            - name: PROXY_PROMETHEUS_TLS_CRT
+              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+            - name: PROXY_PROMETHEUS_TLS_KEY
+              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+          image: registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:latest
+          imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+                - /usr/bin/curl
+                - http://localhost:8080
+            failureThreshold: 6
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: sso
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /usr/bin/curl
+                - http://localhost:8080
+            failureThreshold: 6
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+              cpu: '1'
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}

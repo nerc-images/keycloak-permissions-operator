@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prom-keycloak-proxy
+    deployment: prom-keycloak-proxy
+  name: prom-keycloak-proxy
+  namespace: prom-keycloak-proxy
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: prom-keycloak-proxy
+      deployment: prom-keycloak-proxy
+  strategy:
+    activeDeadlineSeconds: 21600
+    recreateParams:
+      timeoutSeconds: 600
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: prom-keycloak-proxy
+        deployment: prom-keycloak-proxy
+      name: prom-keycloak-proxy
+    spec:
+      containers:
+        - env:
+            - name: PROXY_AUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: postgres-pguser-sso
+            - name: PROXY_AUTH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: postgres-pguser-sso
+            - name: PROXY_AUTH_REALM
+              value: NERC
+            - name: PROXY_AUTH_BASE_URL
+              value: https://keycloak.apps-crc.testing
+            - name: PROXY_AUTH_TLS_VERIFY
+              value: false
+            - name: PROXY_PROMETHEUS_ENDPOINT
+              value: https://observatorium-api-open-cluster-management-observability.apps.nerc-ocp-infra.rc.fas.harvard.edu/api/metrics/v1/default
+            - name: PROXY_PROMETHEUS_CA_CRT
+              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+            - name: PROXY_PROMETHEUS_TLS_CRT
+              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+            - name: PROXY_PROMETHEUS_TLS_KEY
+              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+          image: registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:latest
+          imagePullPolicy: Always
+#          livenessProbe:
+#            exec:
+#              command:
+#                - /bin/bash
+#                - '-c'
+#                - /opt/eap/bin/livenessProbe.sh
+#            failureThreshold: 3
+#            initialDelaySeconds: 60
+#            periodSeconds: 10
+#            successThreshold: 1
+#            timeoutSeconds: 1
+          name: sso
+          ports:
+            - containerPort: 8778
+              name: jolokia
+              protocol: TCP
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+            - containerPort: 8443
+              name: https
+              protocol: TCP
+            - containerPort: 8888
+              name: ping
+              protocol: TCP
+#          readinessProbe:
+#            exec:
+#              command:
+#                - /bin/bash
+#                - '-c'
+#                - /opt/eap/bin/readinessProbe.sh
+#            failureThreshold: 3
+#            periodSeconds: 10
+#            successThreshold: 1
+#            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 1Gi
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 75
+  test: false

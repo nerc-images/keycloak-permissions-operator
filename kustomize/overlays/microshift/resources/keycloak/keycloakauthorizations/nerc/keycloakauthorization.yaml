@@ -22,26 +22,26 @@ spec:
         authorizationSettings:
           scopes:
 
-            - id: nerc-namespace-all
+            - id: namespace-all
               name: all namespaces
               displayName: all namespaces
-            - id: nerc-namespace-rhods-notebooks
+            - id: namespace-rhods-notebooks
               name: rhods-notebooks
               displayName: rhods-notebooks namespace
 
-            - id: nerc-cluster-all
+            - id: cluster-all
               name: all clusters
               displayName: all clusters
-            - id: nerc-cluster-nerc-ocp-infra
+            - id: cluster-nerc-ocp-infra
               name: nerc-ocp-infra
               displayName: nerc-ocp-infra cluster
-            - id: nerc-cluster-nerc-ocp-obs
+            - id: cluster-nerc-ocp-obs
               name: nerc-ocp-obs
               displayName: nerc-ocp-obs cluster
-            - id: nerc-cluster-nerc-ocp-prod
+            - id: cluster-nerc-ocp-prod
               name: nerc-ocp-prod
               displayName: nerc-ocp-prod cluster
-            - id: nerc-cluster-nerc-ocp-test
+            - id: cluster-nerc-ocp-test
               name: nerc-ocp-test
               displayName: nerc-ocp-test cluster
 
@@ -49,33 +49,34 @@ spec:
             - name: cluster
               displayName: cluster
               scopes:
-                - id: nerc-cluster-all
+                - id: cluster-all
                   name: all clusters
                   displayName: all clusters
-                - id: nerc-cluster-nerc-ocp-infra
+                - id: cluster-nerc-ocp-infra
                   name: nerc-ocp-infra
                   displayName: nerc-ocp-infra cluster
-                - id: nerc-cluster-nerc-ocp-obs
+                - id: cluster-nerc-ocp-obs
                   name: nerc-ocp-obs
                   displayName: nerc-ocp-obs cluster
-                - id: nerc-cluster-nerc-ocp-prod
+                - id: cluster-nerc-ocp-prod
                   name: nerc-ocp-prod
                   displayName: nerc-ocp-prod cluster
-                - id: nerc-cluster-nerc-ocp-test
+                - id: cluster-nerc-ocp-test
                   name: nerc-ocp-test
                   displayName: nerc-ocp-test cluster
 
             - name: namespace
               displayName: namespace
               scopes:
-                - id: nerc-namespace-all
+                - id: namespace-all
                   name: all namespaces
                   displayName: all namespaces
-                - id: nerc-namespace-rhods-notebooks
+                - id: namespace-rhods-notebooks
                   name: rhods-notebooks
                   displayName: rhods-notebooks namespace
 
           policies:
+
             - id: group-nerc-ops
               name: group-nerc-ops
               logic: POSITIVE
@@ -85,72 +86,6 @@ spec:
                   groups:
                     - id: nerc-ops
 
-          permissions:
-            - name: group-nerc-ops-cluster-all
-              policy: group-nerc-ops
-              resource: cluster
-            - name: group-nerc-ops-namespace-all
-              policy: group-nerc-ops
-              resource: namespace
-
-      - id: ai4cloudops
-        authorizationSettings:
-          scopes:
-
-            - id: ai4cloudops-namespace-all
-              name: all namespaces
-              displayName: all namespaces
-            - id: ai4cloudops-namespace-rhods-notebook
-              name: rhods-notebooks
-              displayName: rhods-notebooks namespace
-
-            - id: ai4cloudops-cluster-all
-              name: all clusters
-              displayName: all clusters
-            - id: ai4cloudops-cluster-nerc-ocp-infra
-              name: nerc-ocp-infra
-              displayName: nerc-ocp-infra cluster
-            - id: ai4cloudops-cluster-nerc-ocp-obs
-              name: nerc-ocp-obs
-              displayName: nerc-ocp-obs cluster
-            - id: ai4cloudops-cluster-nerc-ocp-prod
-              name: nerc-ocp-prod
-              displayName: nerc-ocp-prod cluster
-            - id: ai4cloudops-cluster-nerc-ocp-test
-              name: nerc-ocp-test
-              displayName: nerc-ocp-test cluster
-
-          resources:
-            - name: cluster
-              displayName: cluster
-              scopes:
-                - id: ai4cloudops-cluster-all
-                  name: all clusters
-                  displayName: all clusters
-                - id: ai4cloudops-cluster-nerc-ocp-infra
-                  name: nerc-ocp-infra
-                  displayName: nerc-ocp-infra cluster
-                - id: ai4cloudops-cluster-nerc-ocp-obs
-                  name: nerc-ocp-obs
-                  displayName: nerc-ocp-obs cluster
-                - id: ai4cloudops-cluster-nerc-ocp-prod
-                  name: nerc-ocp-prod
-                  displayName: nerc-ocp-prod cluster
-                - id: ai4cloudops-cluster-nerc-ocp-test
-                  name: nerc-ocp-test
-                  displayName: nerc-ocp-test cluster
-
-            - name: namespace
-              displayName: namespace
-              scopes:
-                - id: ai4cloudops-namespace-all
-                  name: all namespaces
-                  displayName: all namespaces
-                - id: ai4cloudops-namespace-rhods-notebook
-                  name: rhods-notebooks
-                  displayName: rhods-notebooks namespace
-
-          policies:
             - id: client-ai4cloudops
               name: client-ai4cloudops
               logic: POSITIVE
@@ -168,7 +103,24 @@ spec:
                   groups:
                     - id: nerc-ai4cloudops
 
+            - id: client-oct
+              name: client-oct
+              logic: POSITIVE
+              decisionStrategy: UNANIMOUS
+              type:
+                client:
+                  clients:
+                    - oct
+
           permissions:
+
+            - name: group-nerc-ops-cluster-all
+              policy: group-nerc-ops
+              resource: cluster
+            - name: group-nerc-ops-namespace-all
+              policy: group-nerc-ops
+              resource: namespace
+
             - name: group-nerc-ai4cloudops-namespace-all
               policy: group-nerc-ai4cloudops
               resource: namespace
@@ -184,44 +136,6 @@ spec:
               resource: cluster
               scope: nerc-ocp-prod
 
-      - id: oct
-        authorizationSettings:
-          scopes:
-
-            - id: oct-namespace-all
-              name: all namespaces
-              displayName: all namespaces
-
-            - id: oct-cluster-all
-              name: all clusters
-              displayName: all clusters
-
-          resources:
-            - name: cluster
-              displayName: cluster
-              scopes:
-                - id: oct-cluster-all
-                  name: all clusters
-                  displayName: all clusters
-
-            - name: namespace
-              displayName: namespace
-              scopes:
-                - id: oct-namespace-all
-                  name: all namespaces
-                  displayName: all namespaces
-
-          policies:
-            - id: client-oct
-              name: client-oct
-              logic: POSITIVE
-              decisionStrategy: UNANIMOUS
-              type:
-                client:
-                  clients:
-                    - oct
-
-          permissions:
             - name: client-oct-namespace-all
               policy: client-oct
               resource: namespace
