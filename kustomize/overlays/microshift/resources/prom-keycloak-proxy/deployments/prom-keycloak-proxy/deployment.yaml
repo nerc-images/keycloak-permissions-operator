@@ -31,72 +31,69 @@ spec:
             - name: PROXY_AUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  key: user
-                  name: postgres-pguser-sso
+                  key: PROXY_AUTH_CLIENT_ID
+                  name: prom-keycloak-proxy-secrets
             - name: PROXY_AUTH_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: user
-                  name: postgres-pguser-sso
+                  key: PROXY_AUTH_CLIENT_SECRET
+                  name: prom-keycloak-proxy-secrets
             - name: PROXY_AUTH_REALM
               value: NERC
             - name: PROXY_AUTH_BASE_URL
               value: https://keycloak.apps-crc.testing
             - name: PROXY_AUTH_TLS_VERIFY
-              value: false
-            - name: PROXY_PROMETHEUS_ENDPOINT
-              value: https://observatorium-api-open-cluster-management-observability.apps.nerc-ocp-infra.rc.fas.harvard.edu/api/metrics/v1/default
+              value: 'false'
+            - name: PROXY_PROMETHEUS_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  key: PROXY_PROMETHEUS_BASE_URL
+                  name: prom-keycloak-proxy-secrets
             - name: PROXY_PROMETHEUS_CA_CRT
-              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+              value: /opt/prom-keycloak-proxy-certs/ca.crt
             - name: PROXY_PROMETHEUS_TLS_CRT
-              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
+              value: /opt/prom-keycloak-proxy-certs/tls.crt
             - name: PROXY_PROMETHEUS_TLS_KEY
-              value: /home/ctate/Downloads/proxy-prometheus-ca.crt
-          image: registry.redhat.io/rh-sso-7/sso76-openshift-rhel8:latest
+              value: /opt/prom-keycloak-proxy-certs/tls.key
+          image: quay.io/nerc-images/prom-keycloak-proxy:1.0.0
           imagePullPolicy: Always
-#          livenessProbe:
-#            exec:
-#              command:
-#                - /bin/bash
-#                - '-c'
-#                - /opt/eap/bin/livenessProbe.sh
-#            failureThreshold: 3
-#            initialDelaySeconds: 60
-#            periodSeconds: 10
-#            successThreshold: 1
-#            timeoutSeconds: 1
+          livenessProbe:
+            exec:
+              command:
+                - /usr/bin/curl
+                - http://localhost:8080
+            failureThreshold: 6
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           name: sso
           ports:
-            - containerPort: 8778
-              name: jolokia
-              protocol: TCP
             - containerPort: 8080
               name: http
               protocol: TCP
-            - containerPort: 8443
-              name: https
-              protocol: TCP
-            - containerPort: 8888
-              name: ping
-              protocol: TCP
-#          readinessProbe:
-#            exec:
-#              command:
-#                - /bin/bash
-#                - '-c'
-#                - /opt/eap/bin/readinessProbe.sh
-#            failureThreshold: 3
-#            periodSeconds: 10
-#            successThreshold: 1
-#            timeoutSeconds: 1
+          readinessProbe:
+            exec:
+              command:
+                - /usr/bin/curl
+                - http://localhost:8080
+            failureThreshold: 6
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           resources:
             limits:
               memory: 1Gi
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
+              cpu: '1'
+          volumeMounts:
+            - mountPath: /opt/prom-keycloak-proxy-certs
+              name: prom-keycloak-proxy-certs
+              readOnly: true
+      volumes:
+        - name: prom-keycloak-proxy-certs
+          secret:
+            secretName: prom-keycloak-proxy-certs
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
-      terminationGracePeriodSeconds: 75
-  test: false

@@ -91,44 +91,6 @@ Deploy the latest Operator bundle to your local OpenShift Local cluster.
 operator-sdk -n keycloak run bundle $BUNDLE_IMG --security-context-config restricted
 ```
 
-## Contribute the operator to operatorhub.io
-
-Create a fork of the community-operators repo: https://github.com/k8s-operatorhub/community-operators
-Clone your community-operators fork repository.
-
-```bash
-git clone git@github.com:computate/community-operators.git ~/.local/src/community-operators/
-cd ~/.local/src/community-operators/
-```
-
-Set up the community-operators upstream remote.
-
-```bash
-cd ~/.local/src/community-operators/
-git remote add upstream git@github.com:k8s-operatorhub/community-operators.git
-```
-
-Create a new branch for your version.
-
-```bash
-git checkout -b keycloak-permissions-operator-$VERSION
-```
-
-Copy the latest version of the operator to community-operators.
-
-```bash
-mkdir -p ~/.local/src/community-operators/operators/keycloak-permissions-operator/$VERSION/
-rsync -r bundle/ ~/.local/src/community-operators/operators/keycloak-permissions-operator/$VERSION/
-```
-
-- Git add and git commit your changes. 
-- Be sure to include your signature: `Signed-off-by: My Name <me@example.com>`
-- Make a pull request with the gh CLI.
-
-```bash
-gh pr create -f
-```
-
 ## Contributing new versions of the operator
 
 - Learn [how to contribute new versions of the operator to Kubernetes operatorhub.io](doc/contribute-operator-to-kubernetes.md)
